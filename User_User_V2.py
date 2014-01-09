@@ -61,9 +61,10 @@ for i in range(1, 42000):
                 else:
                     songList[item] = user[0]    
     
-    
-    for song in sorted(songList, key=songList.get, reverse=True):
-        curSong.execute("Select artist, title from songs where songid = %s;", song)
+    song = []
+    song =  sorted(songList, key=songList.get, reverse=True)
+    for n in range(25):
+        curSong.execute("Select artist, title from songs where songid = %s;", song[n])
         resultSong = curSong.fetchall()
         for resSong in resultSong:
             print "The system reccommends user {0} : {1} by {2}".format(i, resSong['title'] , resSong['artist'])
