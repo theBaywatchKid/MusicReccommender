@@ -71,6 +71,6 @@ for k in range(1, 42000):
         curSong.execute("Select artist, title from songs where songid = %s;", song[1])
         resultSong = curSong.fetchall()
         for resSong in resultSong:
-            print "Rating number ({4}) : The system reccommends user {0} : {1} by {2}".format(k, resSong['title'] , resSong['artist'], n)
+            print "The system reccommends user {0} : {1} by {2}".format(k, resSong['title'] , resSong['artist'])
     
 db.close()    
