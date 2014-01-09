@@ -13,7 +13,7 @@ from getpass import getpass
 from operator import itemgetter
 from heapq import heappush, heappop, heappushpop
 
-numItems = 120000 
+numItems = 12000 
 
 #pwd = getpass()
 db = MySQLdb.connect(host="localhost", # your host, usually localhost
@@ -51,14 +51,13 @@ for k in range(1, 42000):
     currentUserMatrix = userMatrix.getrowview(k)    
     currentUserList = currentUserMatrix.rows[0]
     
-
+    Similarity = []
     for i in range( len(currentUserList)):
-        Similarity = {}
         currentItemMatrix = itemMatrix.getrowview(currentUserList[i])      
         for j in range(1, numItems):
             tempItemMatrix = itemMatrix.getrowview(j)
-            if i != j:
-                if j <= 26:
+            if j not in currentUserList:
+                if j <= 26 and i == 0:
                     temp = cosine_similarity(currentItemMatrix, tempItemMatrix)
                     heappush(Similarity, ( temp[0][0], j ))
                 else:    
@@ -66,28 +65,12 @@ for k in range(1, 42000):
                     if temp[0][0] > Similarity[0][0]:
                         heappushpop(Similarity, ( temp[0][0], j))
                   
-
     
-
-    
-    
-    songList = {}
-    for count in range(25):
-        item = heappop(Similarity)
-        itemMatrix = itemMatrix.getrowview(item[1]) 
-        itemList = tempUserMatrix.rows[0]
-        for item in itemList:
-            if item not in currentUserList:
-                if item in songList:
-                    songList[item] += item[0]
-                else:
-                    songList[item] = item[0]    
-    
-    
-    for song in sorted(songList, key=songList.get, reverse=True):
-        curSong.execute("Select artist, title from songs where songid = %s;", song)
+    for n in range(25):
+        song = heappop(Similarity)
+        curSong.execute("Select artist, title from songs where songid = %s;", song[1])
         resultSong = curSong.fetchall()
         for resSong in resultSong:
-            print "The system reccommends user {0} : {1} by {2}".format(i, resSong['title'] , resSong['artist'])
+            print "Rating number ({4}) : The system reccommends user {0} : {1} by {2}".format(k, resSong['title'] , resSong['artist'], n)
     
 db.close()    
