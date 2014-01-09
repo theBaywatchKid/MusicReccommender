@@ -17,7 +17,7 @@ numItems = 120000
 db = MySQLdb.connect(host="localhost", # your host, usually localhost
                      user="root", # your username
                      passwd= "password", # your password
-                     db="soundwaveLocation", 
+                     db="soundwave", 
                      cursorclass=MySQLdb.cursors.DictCursor) 
 
 userMatrix = lil_matrix((42000, 120000))
