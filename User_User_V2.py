@@ -34,17 +34,24 @@ print "Matrix set up."
 
 for i in range(1, 42000):
     Similarity= []
-    currentUserMatrix = matrix.getrowview(i)    
+    currentUserMatrix = matrix.getrowview(i)  
+    currentUserList = currentUserMatrix.rows[0]  
     for j in range(1, numUsers):
         tempUserMatrix = matrix.getrowview(j)
-        if i != j:
-            if j <= 26:
-                temp = cosine_similarity(currentUserMatrix, tempUserMatrix)
-                heappush(Similarity, ( temp[0][0], j ))
-            else:    
-                temp = cosine_similarity(currentUserMatrix, tempUserMatrix)
-                if temp[0][0] > Similarity[0][0]:
-                    heappushpop(Similarity, ( temp[0][0], j))
+        tempUserList = tempUserMatrix.rows[0]
+        for item in tempUserList:
+            if item in currentUserList:
+                check = True
+                break
+        if check == True:    
+            if i != j:
+                if j <= 26:
+                    temp = cosine_similarity(currentUserMatrix, tempUserMatrix)
+                    heappush(Similarity, ( temp[0][0], j ))
+                else:    
+                    temp = cosine_similarity(currentUserMatrix, tempUserMatrix)
+                    if temp[0][0] > Similarity[0][0]:
+                        heappushpop(Similarity, ( temp[0][0], j))
                   
     currentUserMatrix = matrix.getrow(i) 
     currentUserList = currentUserMatrix.rows[0] 
@@ -63,7 +70,7 @@ for i in range(1, 42000):
     
     song = []
     song =  sorted(songList, key=songList.get, reverse=True)
-    for n in range(25):
+    for n in range(len(song)):
         curSong.execute("Select artist, title from songs where songid = %s;", song[n])
         resultSong = curSong.fetchall()
         for resSong in resultSong:

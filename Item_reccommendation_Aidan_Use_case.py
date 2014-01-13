@@ -48,7 +48,7 @@ for j in range(1, numItems):
                 heappushpop(Similarity, ( temp[0][0], j))
 
 
-
+print Similarity
 
 currentSong.execute("Select artist, title from songs where songid = %s;", int(songId))
 result = currentSong.fetchall()
@@ -56,7 +56,7 @@ for res in result:
     print "These reccommendations are based on song: {0} by {1}".format(res['title'] , res['artist'])
 #print song
 
-for n in range(10):
+for n in range(len(Similarity)):
     song = heappop(Similarity)
     curSong.execute("Select artist, title from songs where songid = %s;", song[1])
     resultSong = curSong.fetchall()
