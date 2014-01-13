@@ -1,0 +1,21 @@
+Please type a song Id: 2
+Matrix set up.
+The system initially reccommends songs : So Long, And Thanks For All The Booze by All Time Low 
+The system initially reccommends songs : Fixxxer by Metallica 
+The system initially reccommends songs : A Star Crossed Wasteland by In This Moment 
+The system initially reccommends songs : Quantity is Their Quality by Memphis May Fire 
+The system initially reccommends songs : Abeyance by Black Veil Brides 
+The system initially reccommends songs : Mother Maria (feat. Beth Hart) by Slash 
+The system initially reccommends songs : Endtapes by Twilight 
+The system initially reccommends songs : Jacob Imprints by Carter Burwell 
+The system initially reccommends songs : Always Attract by You Me At Six 
+These reccommendations are based on song: Hurricane (Unplugged) by Seconds To Mars
+The reranked system reccommends song : Abeyance by Black Veil Brides 
+The reranked system reccommends song : Fixxxer by Metallica 
+The reranked system reccommends song : Always Attract by You Me At Six 
+The reranked system reccommends song : Quantity is Their Quality by Memphis May Fire 
+The reranked system reccommends song : A Star Crossed Wasteland by In This Moment 
+The reranked system reccommends song : Mother Maria (feat. Beth Hart) by Slash 
+The reranked system reccommends song : Jacob Imprints by Carter Burwell 
+The reranked system reccommends song : So Long, And Thanks For All The Booze by All Time Low 
+The reranked system reccommends song : Endtapes by Twilight

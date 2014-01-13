@@ -34,6 +34,7 @@ print "Matrix set up."
 
 for i in range(1, 42000):
     Similarity= []
+    count = 0
     currentUserMatrix = matrix.getrowview(i)  
     currentUserList = currentUserMatrix.rows[0]  
     for j in range(1, numUsers):
@@ -45,19 +46,20 @@ for i in range(1, 42000):
                 break
         if check == True:    
             if i != j:
-                if j <= 26:
+                if count <= 26:
                     temp = cosine_similarity(currentUserMatrix, tempUserMatrix)
                     heappush(Similarity, ( temp[0][0], j ))
+                    count += 1
                 else:    
                     temp = cosine_similarity(currentUserMatrix, tempUserMatrix)
                     if temp[0][0] > Similarity[0][0]:
                         heappushpop(Similarity, ( temp[0][0], j))
-                  
+            check = False            
     currentUserMatrix = matrix.getrow(i) 
     currentUserList = currentUserMatrix.rows[0] 
     
     songList = {}
-    for count in range(25):
+    for count in range(len(Similarity)):
         user = heappop(Similarity)
         tempUserMatrix = matrix.getrow(user[1]) 
         tempUserList = tempUserMatrix.rows[0]
