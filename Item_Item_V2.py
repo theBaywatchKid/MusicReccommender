@@ -13,7 +13,7 @@ from getpass import getpass
 from operator import itemgetter
 from heapq import heappush, heappop, heappushpop
 
-numItems = 12000 
+numItems = 120000
 
 #pwd = getpass()
 db = MySQLdb.connect(host="localhost", # your host, usually localhost
@@ -52,25 +52,35 @@ for k in range(1, 42000):
     currentUserList = currentUserMatrix.rows[0]
     
     Similarity = []
+    count = 0
     for i in range( len(currentUserList)):
-        currentItemMatrix = itemMatrix.getrowview(currentUserList[i])      
+        currentItemMatrix = itemMatrix.getrowview(currentUserList[i])
+        currentItemList = currentItemMatrix.rows[0]      
         for j in range(1, numItems):
             tempItemMatrix = itemMatrix.getrowview(j)
-            if j not in currentUserList:
-                if j <= 26 and i == 0:
+            tempItemList = tempItemMatrix.rows[0]
+            for item in tempItemList:
+                if item in currentItemList:
+                    check = True
+                    break
+            if check == True:
+                if count <= 26:
                     temp = cosine_similarity(currentItemMatrix, tempItemMatrix)
                     heappush(Similarity, ( temp[0][0], j ))
+                    count+=1
                 else:    
                     temp = cosine_similarity(currentItemMatrix, tempItemMatrix)
                     if temp[0][0] > Similarity[0][0]:
                         heappushpop(Similarity, ( temp[0][0], j))
-                  
-    
-    for n in range(25):
+                check = False
+                
+    songList = []            
+    for n in range(len(Similarity)):
         song = heappop(Similarity)
-        curSong.execute("Select artist, title from songs where songid = %s;", song[1])
-        resultSong = curSong.fetchall()
-        for resSong in resultSong:
-            print "The system reccommends user {0} : {1} by {2}".format(k, resSong['title'] , resSong['artist'])
-    
+        if song[1] not in songList:
+            curSong.execute("Select artist, title from songs where songid = %s;", song[1])
+            resultSong = curSong.fetchall()
+            for resSong in resultSong:
+                print "The system reccommends user {0} : {1} by {2}".format(k, resSong['title'] , resSong['artist'])
+            songList.append(song[1])    
 db.close()    
