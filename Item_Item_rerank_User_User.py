@@ -43,82 +43,87 @@ for row in rows:
     
 print "Matrix set up." 
 
+currentSong.execute("Select artist, title from songs where songid = %s;", int(songId))
+result = currentSong.fetchall()
+for res in result:
+    print "These reccommendations are based on song: {0} by {1}".format(res['title'] , res['artist'])
+    
 Similarity = []
+count = 0
+check = None
 candidateList = []
-currentItemMatrix = itemMatrix.getrowview(songId)      
+currentItemMatrix = itemMatrix.getrowview(songId) 
+currentItemList = currentItemMatrix.rows[0]     
 for j in range(1, numItems):
-    tempItemMatrix = itemMatrix.getrowview(j) 
-    if j != songId:
-        if j <= 10:
+    tempItemMatrix = itemMatrix.getrowview(j)
+    tempItemList = tempItemMatrix.rows[0]
+    for item in tempItemList:
+        if item in currentItemList:
+            check = True
+            break
+    if check == True:
+        if count <= 26:
             temp = cosine_similarity(currentItemMatrix, tempItemMatrix)
             heappush(Similarity, ( temp[0][0], j ))
+            count+=1
         else:    
             temp = cosine_similarity(currentItemMatrix, tempItemMatrix)
             if temp[0][0] > Similarity[0][0]:
                 heappushpop(Similarity, ( temp[0][0], j))
+        check = False
 
 for index in range(len(Similarity)):
     temp = heappop(Similarity)
     candidateList.append(temp[1])
     
 for n in range(len(candidateList)):
-    curSong.execute("Select artist, title from songs where songid = %s;", int(candidateList[((len(candidateList)-1)-n)]))
-    resultSong = curSong.fetchall()
-    for resSong in resultSong:
-        print "The system initially reccommends songs : {0} by {1} ".format(resSong['title'] , resSong['artist'])
+    if candidateList[((len(candidateList)-1)-n)] not in currentItemList:
+        curSong.execute("Select artist, title from songs where songid = %s;", int(candidateList[((len(candidateList)-1)-n)]))
+        resultSong = curSong.fetchall()
+        for resSong in resultSong:
+            print "The system initially reccommends songs : {0} by {1} ".format(resSong['title'] , resSong['artist'])
 
-inList = False
-userSimilarity = []
-count = 0
-currentUserMatrix = userMatrix.getrowview(userId)    
-for j in range(1, numUsers):
-    tempUserMatrix = userMatrix.getrowview(j)
-    tempUserList = tempUserMatrix.rows[0]
-    for listItem in tempUserList:
-        if listItem in candidateList:
+finalList = {}
+for k in range(len(candidateList)):
+    runningTotal = 0
+    inList = False
+    userSimilarity = []
+    count = 0
+    currentUserMatrix = userMatrix.getrowview(userId)    
+    for j in range(1, numUsers):
+        tempUserMatrix = userMatrix.getrowview(j)
+        tempUserList = tempUserMatrix.rows[0]
+        if candidateList[k] in tempUserList:
             inList = True
             break
-    if inList == True:    
-        if userId != j:
-            if count <= 26:
-                temp = cosine_similarity(currentUserMatrix, tempUserMatrix)
-                heappush(userSimilarity, ( temp[0][0], j ))
-                count += 1
-            else:    
-                temp = cosine_similarity(currentUserMatrix, tempUserMatrix)
-                if temp[0][0] > userSimilarity[0][0]:
-                    heappushpop(userSimilarity, ( temp[0][0], j))
-        inList = False           
-currentUserMatrix = userMatrix.getrow(userId) 
-currentUserList = currentUserMatrix.rows[0] 
+        if inList == True:    
+            if userId != j:
+                if count <= 26:
+                    temp = cosine_similarity(currentUserMatrix, tempUserMatrix)
+                    heappush(userSimilarity, ( temp[0][0], j ))
+                    count += 1
+                else:    
+                    temp = cosine_similarity(currentUserMatrix, tempUserMatrix)
+                    if temp[0][0] > userSimilarity[0][0]:
+                        heappushpop(userSimilarity, ( temp[0][0], j))
+            inList = False         
 
-songList = {}
-for count in range(len(userSimilarity)):
-    user = heappop(userSimilarity)
-    tempUserMatrix = userMatrix.getrow(user[1]) 
-    tempUserList = tempUserMatrix.rows[0]
-    for item in tempUserList:
-        if item in songList:
-            songList[item] += user[0]
-        else:
-            songList[item] = user[0]    
+    for count in range(len(userSimilarity)):
+        user = heappop(userSimilarity)
+        runningTotal += user[0] 
+    
+    finalList[candidateList[k]] = runningTotal
+          
 
 song = []
-song =  sorted(songList, key=songList.get, reverse=True)
+song =  sorted(finalList, key=finalList.get, reverse=True)
 
-relevantSongs = [x for x in song if x in candidateList]
-
-currentSong.execute("Select artist, title from songs where songid = %s;", int(songId))
-result = currentSong.fetchall()
-for res in result:
-    print "These reccommendations are based on song: {0} by {1}".format(res['title'] , res['artist'])
-#print song
-
-for n in range(len(relevantSongs)):
-    curSong.execute("Select artist, title from songs where songid = %s;", int(relevantSongs[n]))
-    resultSong = curSong.fetchall()
-    for resSong in resultSong:
-        print "The reranked system reccommends song : {0} by {1} ".format(resSong['title'] , resSong['artist'])
+for n in range(len(song)):
+    if song[n] not in currentItemList:
+        curSong.execute("Select artist, title from songs where songid = %s;", int(song[n]))
+        resultSong = curSong.fetchall()
+        for resSong in resultSong:
+            print "The reranked system reccommends song : {0} by {1} ".format(resSong['title'] , resSong['artist'])
 
 
 db.close()    
