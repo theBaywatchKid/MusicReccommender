@@ -11,6 +11,7 @@ import math
 import MySQLdb.cursors
 from operator import itemgetter
 from heapq import heappush, heappop, heappushpop
+import scipy.stats
 
 numItems = 120000 
 numUsers = 42000
@@ -74,7 +75,8 @@ for j in range(1, numItems):
 
 for index in range(len(Similarity)):
     temp = heappop(Similarity)
-    candidateList.append(temp[1])
+    if temp[1] != songId:
+        candidateList.append(temp[1])
     
 for n in range(len(candidateList)):
     if candidateList[((len(candidateList)-1)-n)] not in currentItemList:
@@ -124,6 +126,7 @@ for n in range(len(song)):
         resultSong = curSong.fetchall()
         for resSong in resultSong:
             print "The reranked system reccommends song : {0} by {1} ".format(resSong['title'] , resSong['artist'])
-
+spearmanResult = scipy.stats.spearmanr(candidateList, song)
+print "Spearman relation coefficient for reranking :", abs(spearmanResult[0])
 
 db.close()    
