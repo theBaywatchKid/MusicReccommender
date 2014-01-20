@@ -1,3 +1,4 @@
+from __future__ import division
 from scipy.sparse import lil_matrix
 from scipy import spatial
 import heapq
@@ -12,6 +13,7 @@ import MySQLdb.cursors
 from getpass import getpass
 from operator import itemgetter
 from heapq import heappush, heappop, heappushpop
+
 numUsers = 42000 
 
 #pwd = getpass()
@@ -24,26 +26,27 @@ db = MySQLdb.connect(host="localhost", # your host, usually localhost
 trainMatrix = lil_matrix((42000, 120000))
 testMatrix = lil_matrix((42000, 120000))
 
-insertChecker = []
-userChecker = []
+insertChecker = {}
+userChecker = {}
 
 countCursor = db.cursor(cursorclass=MySQLdb.cursors.DictCursor)
 countCursor.execute("SELECT userid, count(userid) as cnt from actions group by userid;");
 countCursorResults = countCursor.fetchall()
 
 for res in countCursorResults:
-    insertChecker[res[userid]] = res[cnt]
-    userChecker[res[userid]] = 0
+    insertChecker[res['userid']] = res['cnt']
+    userChecker[res['userid']] = 0
 
 cur = db.cursor(cursorclass=MySQLdb.cursors.DictCursor)
 curSong = db.cursor(cursorclass=MySQLdb.cursors.DictCursor)
 cur.execute("SELECT songid, userid from actions where type = 'PLAY' order by userid ASC;")
 rows = cur.fetchall()
 for row in rows:
-    if userChecker[row[userid]] > (insertChecker[row[userid]]/2):
+    if userChecker[row['userid']] < (insertChecker[row['userid']]*0.7):
         trainMatrix[row['userid'],row['songid']] = 1; 
+        userChecker[row['userid']] += 1
     else:
-        trainMatrix[row['userid'],row['songid']] = 1;    
+        testMatrix[row['userid'],row['songid']] = 1;    
 
 print "Matrix set up." 
 
@@ -61,7 +64,7 @@ for i in range(1, 42000):
                 break
         if check == True:    
             if i != j:
-                if count <= 26:
+                if count <= 16:
                     temp = cosine_similarity(currentUserMatrix, tempUserMatrix)
                     heappush(Similarity, ( temp[0][0], j ))
                     count += 1
@@ -87,10 +90,17 @@ for i in range(1, 42000):
     
     song = []
     song =  sorted(songList, key=songList.get, reverse=True)
-    for n in range(len(song)):
-        curSong.execute("Select artist, title from songs where songid = %s;", song[n])
-        resultSong = curSong.fetchall()
-        for resSong in resultSong:
-            print "The system reccommends user {0} : {1} by {2}".format(i, resSong['title'] , resSong['artist'])
+#     for n in range(len(song)):
+#         curSong.execute("Select artist, title from songs where songid = %s;", song[n])
+#         resultSong = curSong.fetchall()
+#         for resSong in resultSong:
+#             print "The system reccommends user {0} : {1} by {2}".format(i, resSong['title'] , resSong['artist'])
+    currentUsertestMatrix = testMatrix.getrowview(i)  
+    currentUsertestList = currentUsertestMatrix.rows[0] 
+    
+    numSongsInOrigList = [x for x in song if x in currentUsertestList]
+    if len(currentUsertestList) > 0 and len(numSongsInOrigList) > 0:
+        answer = len(numSongsInOrigList) / len(currentUsertestList)
+        print"The accuracy of this reccommendation was:", answer
     
 db.close()    
