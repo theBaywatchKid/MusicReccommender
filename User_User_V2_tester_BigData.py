@@ -90,7 +90,13 @@ for i in range(1, 100):
                     songList[item] = user[0]    
     
     song = []
+    recSongs = []
     song =  sorted(songList, key=songList.get, reverse=True)
+    if (len(song) >= 5):
+        for index in range(5):
+            recSongs.append(song[index])
+    else:
+        recSongs = song        
 #     for n in range(len(song)):
 #         curSong.execute("Select artist, title from songs where songid = %s;", song[n])
 #         resultSong = curSong.fetchall()
@@ -98,9 +104,9 @@ for i in range(1, 100):
 #             print "The system reccommends user {0} : {1} by {2}".format(i, resSong['title'] , resSong['artist'])
     currentUsertestMatrix = testMatrix.getrowview(i)  
     currentUsertestList = currentUsertestMatrix.rows[0] 
-    numSongsInOrigList = [x for x in song if x in currentUsertestList]
+    numSongsInOrigList = [x for x in recSongs if x in currentUsertestList]
     if len(currentUsertestList) > 0 and len(numSongsInOrigList) > 0:
-        answer = len(numSongsInOrigList) / len(currentUsertestList)
+        answer = len(numSongsInOrigList) / len(recSongs)
         print"The accuracy of this reccommendation was:", answer
         numUs+=1    
         avg += float(answer)
