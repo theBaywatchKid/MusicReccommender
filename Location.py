@@ -11,6 +11,8 @@ from sklearn.cluster import DBSCAN
 from sklearn import metrics
 from sklearn.datasets.samples_generator import make_blobs
 from sklearn.preprocessing import StandardScaler
+from pyechonest import config
+config.ECHO_NEST_API_KEY="ZQMSEM4X59VR36QVL"
 
 import haversine
 
@@ -21,23 +23,24 @@ dbse = MySQLdb.connect(host="localhost", # your host, usually localhost
                      cursorclass=MySQLdb.cursors.DictCursor) 
 average = 0
 avgCounter = 0
-for k in range(1, 1000):
+for k in range(1,500):
     cur = dbse.cursor(cursorclass=MySQLdb.cursors.DictCursor)
-    cur.execute("SELECT userid, lon, lat from actions where type = 'PLAY' and userid = %s;", k);
+    cur.execute("SELECT userid, lon, lat, songid from actions where type = 'PLAY' and userid = %s;", k);
     
     cursorResults = cur.fetchall()
     resultList = []
+    songList = []
     counter = 0
     for rowOrig in cursorResults:
         if rowOrig['lon'] != 0 :
             temp = rowOrig['lon'], rowOrig['lat']
+            songList.append(rowOrig['songid'])
             resultList.append(temp)
             counter+=1
-    if counter >= 30:        
-        #print resultList  
+    if counter >= 30:          
         X = StandardScaler().fit_transform(resultList)
-        #print X
-        db = DBSCAN(eps=0.8, min_samples=5 ).fit(X)
+
+        db = DBSCAN(eps=0.7, min_samples=2).fit(X)
         core_samples = db.core_sample_indices_
         labels = db.labels_
         
@@ -45,17 +48,23 @@ for k in range(1, 1000):
         
         clusters = [X[labels == i] for i in xrange(n_clusters_)]
         #print clusters
-        
+        print k                
         print('Estimated number of clusters: %d' % n_clusters_)
         #print X
         print("Silhouette Coefficient: %0.3f"
               % metrics.silhouette_score(X, labels))
-        print k
         average += metrics.silhouette_score(X, labels)
         avgCounter+=1
-
+        for index in range( len(clusters)):
+            for j in range ( len(clusters[index])):
+                for l in range( len(X)):
+                    if (clusters[index][j][0] == X[l][0]) and (clusters[index][j][1] == X[l][1]):
+                        clusters[index][j] = songList[l]
+        #print clusters                
 finalResult = float(average) / avgCounter  
 print "Final average is ", finalResult   
+
+
 ##############################################################################
 # # Plot result
 # import pylab as pl
