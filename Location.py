@@ -43,7 +43,7 @@ dbse = MySQLdb.connect(host="localhost", # your host, usually localhost
                      cursorclass=MySQLdb.cursors.DictCursor) 
 average = 0
 avgCounter = 0
-for k in range(6,7):
+for k in range(1,100):
     cur = dbse.cursor(cursorclass=MySQLdb.cursors.DictCursor)
     cur.execute("SELECT userid, lon, lat, songid from actions where type = 'PLAY' and userid = %s;", k);
     
@@ -61,7 +61,7 @@ for k in range(6,7):
     resultLoL = [list(elem) for elem in resultList]    
     #print resultLoL
     ResArray = np.asarray(resultLoL)
-    print ResArray
+    #print ResArray
 
     N = ResArray.shape[0]
     distance_matrix = zeros((N, N))
@@ -78,25 +78,24 @@ for k in range(6,7):
 
     #distance_matrix = sp.spatial.distance.squareform(sp.spatial.distance.pdist(ResArray, (lambda u,v: haversine(u,v))))
     #db = DBSCAN(eps=0.3, min_samples=2).fit(X)
-    db = DBSCAN(eps=0.5, min_samples=2, metric="precomputed").fit(distance_matrix)
+    db = DBSCAN(eps=0.3, min_samples=2, metric="precomputed").fit(distance_matrix)
 
     core_samples = db.core_sample_indices_
     #print "core samples", core_samples
     labels = db.labels_
-    
+    #print labels
     n_clusters_ = len(set(labels)) - (1 if -1 in labels else 0)
-    
     clusters = [ResArray[labels == i] for i in xrange(n_clusters_)]
-   # print "Clustered locations" , clusters
-    print k                
+    #print "Clustered locations" , clusters
+    #print k                
     print('Estimated number of clusters: %d' % n_clusters_)
     #print X
     try:
         print("Silhouette Coefficient: %0.3f"
-              % metrics.silhouette_score(distance_matrix, labels))
+              % metrics.silhouette_score(ResArray, labels))
     except ValueError:
         print "error"   
-    average += metrics.silhouette_score(distance_matrix, labels)
+    average += metrics.silhouette_score(ResArray, labels)
     avgCounter+=1
     
     for index in range( len(clusters)):
@@ -105,34 +104,34 @@ for k in range(6,7):
                 if (clusters[index][j][0] == ResArray[l][0]) and (clusters[index][j][1] == ResArray[l][1]):
                     clusters[index][j] = songList[l]
                     
-    print "Songs of clustered locations ", clusters                
+    #print "Songs of clustered locations ", clusters                
 finalResult = float(average) / avgCounter  
 print "Final average is ", finalResult   
 
 
 ##############################################################################
 # # Plot result
-import pylab as pl
-
-unique_labels = set(labels)
-colors = pl.cm.Spectral(np.linspace(0, 1, len(unique_labels)))
-for k, col in zip(unique_labels, colors):
-    if k == -1:
-
-        col = 'k'
-        markersize = 6
-    class_members = [index[0] for index in np.argwhere(labels == k)]
-    cluster_core_samples = [index for index in core_samples
-                            if labels[index] == k]
-    for index in class_members:
-        x = distance_matrix[index]
-        if index in core_samples and k != -1:
-            markersize = 14
-        else:
-            markersize = 6
-        pl.plot(x[0], x[1], 'o', markerfacecolor=col,
-                markeredgecolor='k', markersize=markersize)
-
-pl.title('Estimated number of clusters: %d' % n_clusters_)
-pl.show()
-    
+# import pylab as pl
+# 
+# unique_labels = set(labels)
+# colors = pl.cm.Spectral(np.linspace(0, 1, len(unique_labels)))
+# for k, col in zip(unique_labels, colors):
+#     if k == -1:
+# 
+#         col = 'k'
+#         markersize = 6
+#     class_members = [index[0] for index in np.argwhere(labels == k)]
+#     cluster_core_samples = [index for index in core_samples
+#                             if labels[index] == k]
+#     for index in class_members:
+#         x = distance_matrix[index]
+#         if index in core_samples and k != -1:
+#             markersize = 14
+#         else:
+#             markersize = 6
+#         pl.plot(x[0], x[1], 'o', markerfacecolor=col,
+#                 markeredgecolor='k', markersize=markersize)
+# 
+# pl.title('Estimated number of clusters: %d' % n_clusters_)
+# pl.show()
+#     
