@@ -15,7 +15,7 @@ from pyechonest import config
 from numpy import array,zeros
 from math import radians, cos, sin, asin, sqrt
 config.ECHO_NEST_API_KEY="ZQMSEM4X59VR36QVL"
-
+import EchoNestTest as en
 
 def haversine(lon1, lat1, lon2, lat2):
     """
@@ -72,12 +72,6 @@ for k in range(1,100):
             distance_matrix[i, j] = haversine(loni, lati, lonj, latj)
             distance_matrix[j, i] = distance_matrix[i, j]
             
-   #X = StandardScaler().fit_transform(resultList)
-    #print X
-    #print sp.spatial.distance.squareform
-
-    #distance_matrix = sp.spatial.distance.squareform(sp.spatial.distance.pdist(ResArray, (lambda u,v: haversine(u,v))))
-    #db = DBSCAN(eps=0.3, min_samples=2).fit(X)
     db = DBSCAN(eps=0.3, min_samples=2, metric="precomputed").fit(distance_matrix)
 
     core_samples = db.core_sample_indices_
@@ -108,7 +102,10 @@ for k in range(1,100):
 finalResult = float(average) / avgCounter  
 print "Final average is ", finalResult   
 
-
+for n in (n_clusters_):
+    for k in len(n):
+        print n[k]
+        #en.retrieveTempo(k)
 ##############################################################################
 # # Plot result
 # import pylab as pl

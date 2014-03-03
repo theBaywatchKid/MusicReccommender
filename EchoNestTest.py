@@ -15,6 +15,15 @@ from pyechonest import config
 config.ECHO_NEST_API_KEY="ZQMSEM4X59VR36QVL"
 
 from pyechonest import song
-rkp_results = song.search(artist='Laura Marling', title='Failure')
-karma_police = rkp_results[0]
-print 'tempo:',karma_police.audio_summary
+
+
+def retrieveTempo(artistName, songName):
+    rkp_results = song.search(artist=artistName, title=songName)
+    try:
+        searchResult = rkp_results[0]
+        return  searchResult.audio_summary['tempo']
+    except UnboundLocalError:
+        return 0
+    except IndexError:        
+        return 0
+    
