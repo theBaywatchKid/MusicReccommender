@@ -36,7 +36,7 @@ for i in range(1, 42000):
     Similarity= []
     currentUserMatrix = matrix.getrowview(i)
     currentUserList = currentUserMatrix.rows[0]     
-    for j in range(1, numUsers):
+    for j in range(i, numUsers):
         tempUserMatrix = matrix.getrowview(j)
         tempUserList = tempUserMatrix.rows[0] 
         if i != j:

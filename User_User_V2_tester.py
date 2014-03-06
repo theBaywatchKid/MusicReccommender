@@ -13,9 +13,12 @@ import MySQLdb.cursors
 from getpass import getpass
 from operator import itemgetter
 from heapq import heappush, heappop, heappushpop
+import matplotlib.pyplot as pyplot
+ 
 
-numUsers = 42000 
-
+numUsers = 42000
+average = 0 
+zeroCounter = 0
 #pwd = getpass()
 db = MySQLdb.connect(host="localhost", # your host, usually localhost
                      user="root", # your username
@@ -32,10 +35,18 @@ userChecker = {}
 countCursor = db.cursor(cursorclass=MySQLdb.cursors.DictCursor)
 countCursor.execute("SELECT userid, count(userid) as cnt from actions group by userid;");
 countCursorResults = countCursor.fetchall()
-
+#avgChecker = []
 for res in countCursorResults:
     insertChecker[res['userid']] = res['cnt']
+   # avgChecker.append(res['cnt'])
     userChecker[res['userid']] = 0
+# pyplot.plot(avgChecker) 
+# pyplot.savefig('example01.png') 
+# print "average user", sum(avgChecker)/float(len(avgChecker))
+# arr = np.array(avgChecker)
+# print "std dev", np.std(avgChecker, axis=0)
+
+
 
 cur = db.cursor(cursorclass=MySQLdb.cursors.DictCursor)
 curSong = db.cursor(cursorclass=MySQLdb.cursors.DictCursor)
@@ -50,12 +61,12 @@ for row in rows:
 
 print "Matrix set up." 
 
-for i in range(1, 42000):
+for i in range(1, 1000):
     Similarity= []
     count = 0
     currentUserMatrix = trainMatrix.getrowview(i)  
     currentUserList = currentUserMatrix.rows[0]  
-    for j in range(1, numUsers):
+    for j in range(1, 42000):
         tempUserMatrix = trainMatrix.getrowview(j)
         tempUserList = tempUserMatrix.rows[0]
         for item in tempUserList:
@@ -64,7 +75,7 @@ for i in range(1, 42000):
                 break
         if check == True:    
             if i != j:
-                if count <= 16:
+                if count <= 26:
                     temp = cosine_similarity(currentUserMatrix, tempUserMatrix)
                     heappush(Similarity, ( temp[0][0], j ))
                     count += 1
@@ -97,10 +108,15 @@ for i in range(1, 42000):
 #             print "The system reccommends user {0} : {1} by {2}".format(i, resSong['title'] , resSong['artist'])
     currentUsertestMatrix = testMatrix.getrowview(i)  
     currentUsertestList = currentUsertestMatrix.rows[0] 
-    
+    answer = 0
     numSongsInOrigList = [x for x in song if x in currentUsertestList]
     if len(currentUsertestList) > 0 and len(numSongsInOrigList) > 0:
         answer = len(numSongsInOrigList) / len(currentUsertestList)
-        print"The accuracy of this reccommendation was:", answer
+    else:
+        zeroCounter+=1
     
+    average += answer
+    print"The accuracy of this reccommendation was:", answer
+print "Average", float(average)/1000
+print "zeros", zeroCounter    
 db.close()    

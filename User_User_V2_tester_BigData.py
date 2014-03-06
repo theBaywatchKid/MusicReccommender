@@ -33,9 +33,16 @@ countCursor = db.cursor(cursorclass=MySQLdb.cursors.DictCursor)
 countCursor.execute("SELECT userid, count(userid) as cnt from actions group by userid;");
 countCursorResults = countCursor.fetchall()
 
+#avgChecker = []
 for res in countCursorResults:
     insertChecker[res['userid']] = res['cnt']
+    #avgChecker.append(res['cnt'])
     userChecker[res['userid']] = 0
+
+#testing average and standard deviation   
+# print "average user", sum(avgChecker)/float(len(avgChecker))
+# arr = np.array(avgChecker)
+# print "std dev", np.std(avgChecker, axis=0)
 
 cur = db.cursor(cursorclass=MySQLdb.cursors.DictCursor)
 curSong = db.cursor(cursorclass=MySQLdb.cursors.DictCursor)
@@ -50,6 +57,7 @@ for row in rows:
 
 print "Matrix set up." 
 numUs = 0
+numZeros = 0
 avg = 0
 for i in range(1, 100):
     Similarity= []
@@ -104,13 +112,17 @@ for i in range(1, 100):
 #             print "The system reccommends user {0} : {1} by {2}".format(i, resSong['title'] , resSong['artist'])
     currentUsertestMatrix = testMatrix.getrowview(i)  
     currentUsertestList = currentUsertestMatrix.rows[0] 
+    answer = 0
     numSongsInOrigList = [x for x in recSongs if x in currentUsertestList]
     if len(currentUsertestList) > 0 and len(numSongsInOrigList) > 0:
         answer = len(numSongsInOrigList) / len(recSongs)
-        print"The accuracy of this reccommendation was:", answer
-        numUs+=1    
-        avg += float(answer)
+    else:
+        numZeros+= 1
+    print"The accuracy of this reccommendation was:", answer
+    numUs+=1    
+    avg += float(answer)
         
 print numUs 
-print avg / float(numUs)   
+print "average", avg / float(numUs)
+print "user coverage", numZeros   
 db.close()    
