@@ -39,7 +39,8 @@ print "Matrix set up."
 
 print itemMatrix.getrowview(1000)
     
-
+print "Number zeros", itemMatrix.nnz
+print "Total items", itemMatrix.size
     
 Similarity = []
 count = 0
