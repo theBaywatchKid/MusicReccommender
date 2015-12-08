@@ -1,13 +1,13 @@
 MusicReccommender
 =================
 
-Final Year Project for James Murphy based on  Music Reccommendation.
+Final Year Project based on  Music Reccommendation.
 
 <h2>
 Description of Project
 </h2>
 
-Conducted Final Year Project entitled " Music Recommendation using Collaborative Filtering, assisted by Location Services", with oversight from Dr Derek Bridge (UCC) - Attained First Class Honours Grade for Project. Publishing code publically here for research use.
+Conducted Final Year Project entitled " Music Recommendation using Collaborative Filtering, assisted by Location Services". Attained First Class Honours Grade for Project. Publishing code publically here for research use.
 
 Music recommendation was mainly implemented through collaborative filtering, with the aid of location services or Content Filtering in some reccommender systems. 
 
